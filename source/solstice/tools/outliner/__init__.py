@@ -46,7 +46,15 @@ def init(do_reload=False):
     Initializes module
     """
 
-    packages_order = []
+    # First we initialize artellapipe.tools.outliner modules
+    from artellapipe.tools import outliner
+    outliner.init(do_reload=do_reload)
+
+    packages_order = [
+        'solstice.tools.outliner.items',
+        'solstice.tools.outliner.widgets',
+        'solstice.tools.outilner.outliners'
+    ]
 
     outliner_importer = importer.init_importer(importer_class=SolsticeOutliner, do_reload=False)
     outliner_importer.import_packages(order=packages_order, only_packages=False)
