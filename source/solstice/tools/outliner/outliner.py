@@ -14,7 +14,7 @@ __email__ = "tpovedatd@gmail.com"
 
 import tpDccLib as tp
 
-import artellapipe.core
+import artellapipe
 from artellapipe.gui import window
 from artellapipe.tools.outliner import outliner
 
@@ -53,9 +53,9 @@ class SolsticeOutliner(outliner.ArtellaOutliner, object):
 
 def run():
     if tp.is_maya():
-        win = window.dock_window(project=artellapipe.core.solstice, window_class=SolsticeOutlinerWidget)
+        win = window.dock_window(project=artellapipe.solstice, window_class=SolsticeOutlinerWidget)
         return win
     else:
-        win = SolsticeOutliner(project=artellapipe.core.solstice)
+        win = SolsticeOutliner(project=artellapipe.solstice)
         win.show()
         return win

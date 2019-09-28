@@ -21,7 +21,7 @@ from tpPyUtils import decorators
 
 import tpDccLib as tp
 
-import artellapipe.core
+import artellapipe
 from artellapipe.core import defines as artella_defines
 from artellapipe.utils import resource, tag
 from artellapipe.tools.outliner.widgets import items
@@ -89,7 +89,7 @@ class SolsticeOutlinerAssetItem(items.OutlinerAssetItem, object):
             return
 
         if self._asset_node.is_rig():
-            n_tag = tag.get_tag_node(project=artellapipe.core.solstice, node=self._asset_node.node)
+            n_tag = tag.get_tag_node(project=artellapipe.solstice, node=self._asset_node.node)
             if not n_tag:
                 logger.warning('Not Tag Node found. Aborting operation ...')
                 return False
@@ -119,7 +119,7 @@ class SolsticeOutlinerAssetItem(items.OutlinerAssetItem, object):
             current_matrix = tp.Dcc.node_matrix(node_to_retrieve_xform)
             ref_nodes = abc_file_type.reference_file(status=artella_defines.ARTELLA_SYNC_PUBLISHED_ASSET_STATUS)
             for n in ref_nodes:
-                n_tag = tag.get_tag_node(project=artellapipe.core.solstice, node=n)
+                n_tag = tag.get_tag_node(project=artellapipe.solstice, node=n)
                 if n_tag:
                     main_node = n_tag.get_asset_node()
                     if not main_node:
@@ -202,7 +202,7 @@ class SolsticeOutlinerAssetItem(items.OutlinerAssetItem, object):
             ref_nodes = node_asset.reference_file(file_type='rig', status=artella_defines.ARTELLA_SYNC_PUBLISHED_ASSET_STATUS)
             n_tag = None
             for n in ref_nodes:
-                n_tag = tag.get_tag_node(project=artellapipe.core.solstice, node=n)
+                n_tag = tag.get_tag_node(project=artellapipe.solstice, node=n)
                 if n_tag:
                     main_node = n_tag.get_asset_node()
                     if not main_node:
