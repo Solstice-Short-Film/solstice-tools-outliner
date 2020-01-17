@@ -40,4 +40,3 @@ class SolsticeOutlinerTool(artellapipe.Tool, object):
         """
 
         self.register_callback(tp.DccCallbacks.NodeSelect, fn=self._outliner.select_asset)
-
