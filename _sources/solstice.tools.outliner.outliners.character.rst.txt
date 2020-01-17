@@ -1,0 +1,7 @@
+solstice.tools.outliner.outliners.character module
+==================================================
+
+.. automodule:: solstice.tools.outliner.outliners.character
+   :members:
+   :undoc-members:
+   :show-inheritance:

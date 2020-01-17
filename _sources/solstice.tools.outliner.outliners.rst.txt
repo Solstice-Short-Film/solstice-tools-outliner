@@ -1,0 +1,21 @@
+solstice.tools.outliner.outliners package
+=========================================
+
+Submodules
+----------
+
+.. toctree::
+
+   solstice.tools.outliner.outliners.camera
+   solstice.tools.outliner.outliners.character
+   solstice.tools.outliner.outliners.fx
+   solstice.tools.outliner.outliners.light
+   solstice.tools.outliner.outliners.prop
+
+Module contents
+---------------
+
+.. automodule:: solstice.tools.outliner.outliners
+   :members:
+   :undoc-members:
+   :show-inheritance:

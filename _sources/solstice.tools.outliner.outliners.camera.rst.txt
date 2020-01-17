@@ -1,0 +1,7 @@
+solstice.tools.outliner.outliners.camera module
+===============================================
+
+.. automodule:: solstice.tools.outliner.outliners.camera
+   :members:
+   :undoc-members:
+   :show-inheritance:

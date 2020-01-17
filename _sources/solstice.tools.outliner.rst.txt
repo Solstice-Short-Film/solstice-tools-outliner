@@ -1,0 +1,24 @@
+solstice.tools.outliner package
+===============================
+
+Subpackages
+-----------
+
+.. toctree::
+
+   solstice.tools.outliner.outliners
+
+Submodules
+----------
+
+.. toctree::
+
+   solstice.tools.outliner.outliner
+
+Module contents
+---------------
+
+.. automodule:: solstice.tools.outliner
+   :members:
+   :undoc-members:
+   :show-inheritance:

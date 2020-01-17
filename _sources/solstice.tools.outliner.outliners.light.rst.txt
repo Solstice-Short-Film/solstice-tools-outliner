@@ -1,0 +1,7 @@
+solstice.tools.outliner.outliners.light module
+==============================================
+
+.. automodule:: solstice.tools.outliner.outliners.light
+   :members:
+   :undoc-members:
+   :show-inheritance:
