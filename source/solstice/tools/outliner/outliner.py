@@ -15,47 +15,29 @@ __email__ = "tpovedatd@gmail.com"
 import tpDccLib as tp
 
 import artellapipe
-from artellapipe.gui import window
 from artellapipe.tools.outliner import outliner
 
 
 class SolsticeOutlinerWidget(outliner.ArtellaOutlinerWidget, object):
+    def __init__(self, project, config, parent=None):
+        super(SolsticeOutlinerWidget, self).__init__(project=project, config=config, parent=parent)
 
-    title = 'Solstice - Outliner'
 
-    def __init__(self, project, parent=None):
-        super(SolsticeOutlinerWidget, self).__init__(project=project, parent=parent)
+class SolsticeOutlinerTool(artellapipe.Tool, object):
 
-    def _create_outliners(self):
+    def __init__(self, project, config):
+        super(SolsticeOutlinerTool, self).__init__(project=project, config=config)
+
+    def ui(self):
+        super(SolsticeOutlinerTool, self).ui()
+
+        self._outliner = SolsticeOutlinerWidget(project=self._project, config=self.config)
+        self.main_layout.addWidget(self._outliner)
+
+    def post_attacher_set(self):
         """
-        Overrides base ArtellaOutlinerWidget _create_outliners function
-        Updates current tag categories with the given ones
-        :param outliner_categories: list(str)
+        Function that is called once an attacher has been set
         """
 
-        from solstice.tools.outliner.outliners import assetsoutliner, characteroutliner, cameraoutliner, lightoutliner
+        self.register_callback(tp.DccCallbacks.NodeSelect, fn=self._outliner.select_asset)
 
-        assets_outliner = assetsoutliner.SolsticePropsBgeElementsOutliner(project=self._project)
-        characters_outlienr = characteroutliner.SolsticeCharactersOutliner(project=self._project)
-        cameras_outliner = cameraoutliner.SolsticeCamerasOutliner(project=self._project)
-        lights_outliner = lightoutliner.SolsticeLightsOutliner(project=self._project)
-
-        self.add_outliner(assets_outliner)
-        self.add_outliner(characters_outlienr)
-        self.add_outliner(cameras_outliner)
-        self.add_outliner(lights_outliner)
-
-
-class SolsticeOutliner(outliner.ArtellaOutliner, object):
-    def __init__(self, project, parent=None):
-        super(SolsticeOutliner, self).__init__(project=project, parent=parent)
-
-
-def run():
-    if tp.is_maya():
-        win = window.dock_window(project=artellapipe.solstice, window_class=SolsticeOutlinerWidget)
-        return win
-    else:
-        win = SolsticeOutliner(project=artellapipe.solstice)
-        win.show()
-        return win
