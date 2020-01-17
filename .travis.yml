@@ -7,7 +7,7 @@ install:
 script:
 - find . -name \*.py -exec pycodestyle --max-line-length=120 --ignore=E402 {} +
 - pytest --cov=artellapipe
-- sphinx-apidoc -f -e -o docs/sphinx artellapipe
+- sphinx-apidoc -f -e -o docs/sphinx solstice
 - sphinx-build -M html ./docs/sphinx ./
 after_success:
 - coveralls
