@@ -1,5 +1,5 @@
 # ===================================================================
 # solstice-tools-outliner requirements file
 # ===================================================================
-
+artellapipe
 artellapipe-tools-outliner
