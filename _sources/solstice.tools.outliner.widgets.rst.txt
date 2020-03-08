@@ -1,0 +1,17 @@
+solstice.tools.outliner.widgets package
+=======================================
+
+Submodules
+----------
+
+.. toctree::
+
+   solstice.tools.outliner.widgets.outliner
+
+Module contents
+---------------
+
+.. automodule:: solstice.tools.outliner.widgets
+   :members:
+   :undoc-members:
+   :show-inheritance:

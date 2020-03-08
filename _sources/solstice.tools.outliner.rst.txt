@@ -6,14 +6,9 @@ Subpackages
 
 .. toctree::
 
+   solstice.tools.outliner.core
    solstice.tools.outliner.outliners
-
-Submodules
-----------
-
-.. toctree::
-
-   solstice.tools.outliner.outliner
+   solstice.tools.outliner.widgets
 
 Module contents
 ---------------
