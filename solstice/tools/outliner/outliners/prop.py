@@ -18,13 +18,9 @@ from functools import partial
 from Qt.QtCore import *
 from Qt.QtWidgets import *
 
-import tpDccLib as tp
+import tpDcc
 
-import artellapipe
-from artellapipe.utils import resource
 from artellapipe.tools.outliner.widgets import baseoutliner
-
-from solstice.core import utils
 
 LOGGER = logging.getLogger()
 
@@ -38,13 +34,15 @@ class SolsticePropsOutliner(baseoutliner.BaseOutliner, object):
         super(SolsticePropsOutliner, self).__init__(project=project, parent=parent)
 
     def _create_context_menu(self, menu, item):
-        replace_icon = resource.ResourceManager().icon('replace')
-        delete_icon = resource.ResourceManager().icon('delete')
-        override_add_icon = resource.ResourceManager().icon('override_add')
-        override_delete_icon = resource.ResourceManager().icon('override_delete')
-        override_export_icon = resource.ResourceManager().icon('save')
-        load_shaders_icon = resource.ResourceManager().icon('shading_load')
-        unload_shaders_icon = resource.ResourceManager().icon('shading_unload')
+        replace_icon = tpDcc.ResourcesMgr().icon('replace')
+        delete_icon = tpDcc.ResourcesMgr().icon('delete')
+        override_add_icon = tpDcc.ResourcesMgr().icon('override_add')
+        override_delete_icon = tpDcc.ResourcesMgr().icon('override_delete')
+        override_export_icon = tpDcc.ResourcesMgr().icon('save')
+        load_shaders_icon = tpDcc.ResourcesMgr().icon('shading_load')
+        unload_shaders_icon = tpDcc.ResourcesMgr().icon('shading_unload')
+        proxy_icon = tpDcc.ResourcesMgr().icon('low_poly')
+        high_icon = tpDcc.ResourcesMgr().icon('high_poly')
 
         replace_menu = QMenu('Replace by', self)
         replace_menu.setIcon(replace_icon)
@@ -77,12 +75,20 @@ class SolsticePropsOutliner(baseoutliner.BaseOutliner, object):
         if valid_override or has_overrides or export_overrides:
             menu.addSeparator()
 
+        switch_to_proxy = QAction(proxy_icon, 'Switch to Low Res', menu)
+        switch_to_high = QAction(high_icon, 'Switch to High Res', menu)
+        menu.addAction(switch_to_proxy)
+        menu.addAction(switch_to_high)
+        menu.addSeparator()
+
         load_shaders_action = QAction(load_shaders_icon, 'Load Shaders', menu)
         unload_shaders_action = QAction(unload_shaders_icon, 'Unload Shaders', menu)
         menu.addAction(load_shaders_action)
         menu.addAction(unload_shaders_action)
 
         remove_action.triggered.connect(partial(self._on_remove, item))
+        switch_to_proxy.triggered.connect(partial(self._on_switch_to_proxy, item))
+        switch_to_high.triggered.connect(partial(self._on_switch_to_high, item))
         load_shaders_action.triggered.connect(partial(self._on_load_shaders, item))
         unload_shaders_action.triggered.connect(partial(self._on_unload_shaders, item))
 
@@ -93,13 +99,16 @@ class SolsticePropsOutliner(baseoutliner.BaseOutliner, object):
         :return: bool
         """
 
-        rig_icon = resource.ResourceManager().icon('rig')
-        alembic_icon = resource.ResourceManager().icon('alembic')
+        rig_icon = tpDcc.ResourcesMgr().icon('rig')
+        alembic_icon = tpDcc.ResourcesMgr().icon('alembic')
+        standin_icon = tpDcc.ResourcesMgr().icon('standin')
 
         rig_action = QAction(rig_icon, 'Rig', replace_menu)
         gpu_cache_action = QAction(alembic_icon, 'Gpu Cache', replace_menu)
+        standin_action = QAction(standin_icon, 'Standin', replace_menu)
         replace_menu.addAction(rig_action)
         replace_menu.addAction(gpu_cache_action)
+        replace_menu.addAction(standin_action)
 
         rig_replace_menu = QMenu()
         rig_action.setMenu(rig_replace_menu)
@@ -115,17 +124,44 @@ class SolsticePropsOutliner(baseoutliner.BaseOutliner, object):
         gpu_cache_replace_menu.addAction(gpu_cache_root_control_action)
         gpu_cache_replace_menu.addAction(gpu_cache_main_control_action)
 
+        standin_replace_menu = QMenu()
+        standin_action.setMenu(standin_replace_menu)
+        standin_root_control_action = QAction('Root Control', replace_menu)
+        standin_main_control_action = QAction('Main Control', replace_menu)
+        standin_replace_menu.addAction(standin_root_control_action)
+        standin_replace_menu.addAction(standin_main_control_action)
+
         if item.asset_node.is_rig():
             rig_action.setEnabled(False)
-        if item.asset_node.is_gpu_cache():
+        elif item.asset_node.is_gpu_cache():
             gpu_cache_action.setEnabled(False)
+        elif item.asset_node.is_standin():
+            standin_action.setEnabled(False)
 
         rig_root_control_action.triggered.connect(partial(self._on_replace_rig, item, 'root_ctrl'))
         rig_main_control_action.triggered.connect(partial(self._on_replace_rig, item, 'main_ctrl'))
         gpu_cache_root_control_action.triggered.connect(partial(self._on_replace_gpu_cache, item, 'root_ctrl'))
         gpu_cache_main_control_action.triggered.connect(partial(self._on_replace_gpu_cache, item, 'main_ctrl'))
+        standin_root_control_action.triggered.connect(partial(self._on_replace_standin, item, 'root_ctrl'))
+        gpu_cache_main_control_action.triggered.connect(partial(self._on_replace_standin, item, 'main_ctrl'))
 
         return replace_menu
+
+    def _on_switch_to_proxy(self, item):
+        """
+        Internal callback function that is called when Switch to Low Res action is triggered
+        :param item:
+        """
+
+        item.asset_node.switch_to_proxy()
+
+    def _on_switch_to_high(self, item):
+        """
+        Internal callback function that is called when Switch to High Res action is triggered
+        :param item:
+        """
+
+        item.asset_node.switch_to_hires()
 
     def _on_load_shaders(self, item):
         """
@@ -156,39 +192,6 @@ class SolsticePropsOutliner(baseoutliner.BaseOutliner, object):
 
         return True
 
-        # if not rig_control:
-        #     rig_control = 'root_ctrl'
-        #
-        # if item.asset_node.is_rig():
-        #     LOGGER.warning('You have already rig file of the asset loaded!')
-        #
-        # rig_file_class = artellapipe.FilesMgr().get_file_class('rig')
-        # if not rig_file_class:
-        #     LOGGER.warning('Impossible to reference rig file because Rig File Class (rig) was not found!')
-        #     return
-        #
-        # current_matrix = tp.Dcc.node_matrix(item.asset_node.node)
-        #
-        # rig_file = rig_file_class(item.asset_node.asset)
-        # ref_nodes = rig_file.import_file(reference=True)
-        # if not ref_nodes:
-        #     LOGGER.warning('No nodes imported into current scene for rig file!')
-        #     return None
-        #
-        # root_ctrl = None
-        # for node in ref_nodes:
-        #     root_ctrl = utils.get_control(node=node, rig_control=rig_control)
-        #     if root_ctrl:
-        #         break
-        # if not root_ctrl:
-        #     return False
-        #
-        # tp.Dcc.set_node_matrix(root_ctrl, current_matrix)
-        # item.asset_node.remove()
-        # self.refresh()
-        #
-        # return True
-
     def _on_replace_gpu_cache(self, item, rig_control=None):
         """
         Internal callback function that is called when an asset is replaced by a rig
@@ -204,42 +207,17 @@ class SolsticePropsOutliner(baseoutliner.BaseOutliner, object):
 
         return True
 
-        # if not rig_control:
-        #     rig_control = 'root_ctrl'
-        #
-        # main_ctrl = item.asset_node.get_control(rig_control)
-        # if not main_ctrl:
-        #     LOGGER.warning('No Main Control found for Asset Node: {}'.format(item.asset_node.node))
-        #     return False
-        #
-        # main_world_translate = tp.Dcc.node_world_space_translation(main_ctrl)
-        # main_world_rotation = tp.Dcc.node_world_space_rotation(main_ctrl)
-        # main_world_scale = tp.Dcc.node_world_space_scale(main_ctrl)
-        #
-        # if item.asset_node.is_gpu_cache():
-        #     LOGGER.warning('You have already gpu cache file of the asset loaded!')
-        #
-        # gpu_cache_file_class = artellapipe.FilesMgr().get_file_class('gpualembic')
-        # if not gpu_cache_file_class:
-        #     LOGGER.warning('Impossible to import gpu cache file because Rig File Class (rig) was not found!')
-        #     return False
-        #
-        # gpu_cache_file = gpu_cache_file_class(item.asset_node.asset)
-        # ref_nodes = gpu_cache_file.import_file()
-        # if not ref_nodes:
-        #     LOGGER.warning('No nodes imported into current scene for gpu cache file!')
-        #     return False
-        #
-        # if isinstance(ref_nodes, (list, tuple)):
-        #     gpu_cache_node = ref_nodes[0]
-        # else:
-        #     gpu_cache_node = ref_nodes
-        #
-        # tp.Dcc.translate_node_in_world_space(gpu_cache_node, main_world_translate)
-        # tp.Dcc.rotate_node_in_world_space(gpu_cache_node, main_world_rotation)
-        # tp.Dcc.scale_node_in_world_space(gpu_cache_node, main_world_scale)
-        #
-        # item.asset_node.remove()
-        # self.refresh()
-        #
-        # return True
+    def _on_replace_standin(self, item, rig_control=None):
+        """
+        Internal callback function that is called when an asset is replaced by a rig
+        :param item: OutlinerAssetItem
+        :param rig_control: str
+        """
+
+        valid_replace = item.asset_node.replace_by_standin(rig_control=rig_control)
+        if not valid_replace:
+            return False
+
+        self.refresh()
+
+        return True
